@@ -1,8 +1,0 @@
-# Proxmox
-10.0.0.10
-# Wailord
-10.0.0.11
-# Chansey
-10.0.0.12
-# Murkrow
-10.0.0.13
