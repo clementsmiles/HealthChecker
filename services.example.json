@@ -1,0 +1,29 @@
+{
+  "services": [
+    {
+      "name": "Proxmox",
+      "type": "ping",
+      "target": "10.0.0.10",
+      "description": "Proxmox VE"
+    },
+    {
+      "name": "Chansey",
+      "type": "ping",
+      "target": "10.0.0.12",
+      "description": "OpenMediaVault NAS host"
+    },
+    {
+      "name": "Wailord SSH",
+      "type": "ssh",
+      "target": "10.0.0.11",
+      "description": "SSH access to Wailord"
+    },
+    {
+      "name": "Proxmox Temperature",
+      "type": "temperature",
+      "target": "10.0.0.10",
+      "threshold": 75,
+      "description": "Bare-metal Proxmox temperature"
+    }
+  ]
+}
