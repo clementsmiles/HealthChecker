@@ -7,8 +7,11 @@ import re
 import socket
 import subprocess
 import sys
+import threading
 import time
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
+from socketserver import ThreadingMixIn
 
 BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_CONFIG_PATH = BASE_DIR / "services.json"
@@ -16,6 +19,7 @@ DEFAULT_OUTPUT_PATH = BASE_DIR / "status_cache.json"
 DEFAULT_HOSTS_PATH = Path.home() / "Information" / "hosts.txt"
 DEFAULT_CREDENTIALS_PATH = Path.home() / "Information" / "credentials.txt"
 DEFAULT_SECRET_PATH = Path.home() / "Information" / "credentials_secret.txt"
+DEFAULT_API_PORT = 8001
 SSH_OPTIONS = [
     "-o",
     "ConnectTimeout=5",
@@ -26,6 +30,15 @@ SSH_OPTIONS = [
     "-o",
     "PasswordAuthentication=yes",
 ]
+
+_CACHE_LOCK = threading.Lock()
+_STATUS_CACHE = {
+    "services": [],
+    "metrics": {},
+    "errors_by_host": {},
+    "ip_to_name": {},
+    "updated_at": None,
+}
 
 
 def load_services(config_path):
@@ -398,9 +411,52 @@ def build_status(config_path, hosts_path, credentials_path, secret_path):
 
 
 def save_status(status, output_path):
+    global _STATUS_CACHE
     status["updated_at"] = time.time()
+    _STATUS_CACHE = status
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(status, f, indent=2)
+
+
+def load_cache(output_path):
+    global _STATUS_CACHE
+    if output_path.exists():
+        try:
+            with open(output_path, "r", encoding="utf-8") as f:
+                _STATUS_CACHE = json.load(f)
+        except Exception as e:
+            print(f"Failed to load cache: {e}")
+    return _STATUS_CACHE
+
+
+class StatusHandler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        super().end_headers()
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.end_headers()
+
+    def do_GET(self):
+        if self.path == "/status":
+            with _CACHE_LOCK:
+                status = _STATUS_CACHE.copy()
+            payload = json.dumps(status, indent=2)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(payload.encode("utf-8"))))
+            self.end_headers()
+            self.wfile.write(payload.encode("utf-8"))
+            return
+        self.send_response(404)
+        self.end_headers()
+
+
+class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
+    daemon_threads = True
 
 
 def parse_args():
@@ -411,12 +467,29 @@ def parse_args():
     parser.add_argument("--secret", default=DEFAULT_SECRET_PATH, help="Path to SSH password secret")
     parser.add_argument("--output", default=DEFAULT_OUTPUT_PATH, help="Path to write status cache JSON")
     parser.add_argument("--interval", type=int, default=0, help="Seconds between repeated checks (0 = run once)")
+    parser.add_argument("--serve", action="store_true", help="Run an HTTP API server for dashboard status requests")
+    parser.add_argument("--api-port", type=int, default=DEFAULT_API_PORT, help="Port for the HTTP status API")
     return parser.parse_args()
+
+
+def start_api_server(port):
+    server_address = ('', port)
+    httpd = ThreadingHTTPServer(server_address, StatusHandler)
+    print(f"HealthChecker status API available at http://localhost:{port}/status")
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        pass
 
 
 def main():
     args = parse_args()
     output_path = Path(args.output)
+    load_cache(output_path)
+    server_thread = None
+    if args.serve:
+        server_thread = threading.Thread(target=start_api_server, args=(args.api_port,), daemon=True)
+        server_thread.start()
     if args.interval > 0:
         print(f"Starting standalone health checker, writing cache to {output_path}")
         while True:
@@ -428,6 +501,13 @@ def main():
         status = build_status(args.config, Path(args.hosts), Path(args.credentials), Path(args.secret))
         save_status(status, output_path)
         print(f"Wrote status cache to {output_path}")
+        if args.serve:
+            print("Serving status API. Press Ctrl+C to exit.")
+            try:
+                while True:
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                pass
 
 
 if __name__ == "__main__":

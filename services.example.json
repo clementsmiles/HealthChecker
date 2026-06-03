@@ -1,0 +1,37 @@
+{
+  "services": [
+    {
+      "name": "Astra Ping",
+      "type": "ping",
+      "target": "192.168.100.10",
+      "description": "Ping check for the Astra hardware host"
+    },
+    {
+      "name": "Nimbus SSH",
+      "type": "ssh",
+      "target": "192.168.100.11",
+      "description": "SSH access to Nimbus VM"
+    },
+    {
+      "name": "Cumulus NAS",
+      "type": "tcp",
+      "target": "192.168.100.12",
+      "port": 445,
+      "description": "SMB port check for the NAS"
+    },
+    {
+      "name": "Zephyr Docker",
+      "type": "docker",
+      "target": "192.168.100.13",
+      "container": "webapp",
+      "description": "Docker container status for webapp"
+    },
+    {
+      "name": "Astra Temperature",
+      "type": "temperature",
+      "target": "192.168.100.10",
+      "threshold": 70,
+      "description": "Temperature threshold for Astra"
+    }
+  ]
+}

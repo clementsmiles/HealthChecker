@@ -1,0 +1,29 @@
+{
+  "Nodes": [
+    {
+      "Astra": {
+        "IP": "192.168.100.10",
+        "Type": "Hardware",
+        "OS": "Debian 12",
+        "Services": ["nginx", "postgres"]
+      },
+      "Nimbus": {
+        "IP": "192.168.100.11",
+        "Type": "Virtual Machine",
+        "OS": "Ubuntu 24.04",
+        "Services": ["docker", "traefik"]
+      },
+      "Cumulus": {
+        "IP": "192.168.100.12",
+        "Type": "Hardware",
+        "OS": "OpenMediaVault",
+        "Services": ["samba"]
+      },
+      "Zephyr": {
+        "IP": "192.168.100.13",
+        "Type": "Virtual Machine",
+        "OS": "Alpine Linux"
+      }
+    }
+  ]
+}

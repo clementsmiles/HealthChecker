@@ -1,0 +1,102 @@
+{
+  "services": [
+    {
+      "name": "Astra Ping",
+      "type": "ping",
+      "target": "192.168.100.10",
+      "host_name": "Astra",
+      "port": null,
+      "description": "Ping check for the Astra hardware host",
+      "status": "online",
+      "healthy": true,
+      "details": "ping 192.168.100.10"
+    },
+    {
+      "name": "Nimbus SSH",
+      "type": "ssh",
+      "target": "192.168.100.11",
+      "host_name": "Nimbus",
+      "port": null,
+      "description": "SSH access to Nimbus VM",
+      "status": "online",
+      "healthy": true,
+      "details": "ssh access to 192.168.100.11"
+    },
+    {
+      "name": "Cumulus NAS",
+      "type": "tcp",
+      "target": "192.168.100.12",
+      "host_name": "Cumulus",
+      "port": 445,
+      "description": "SMB port check for the NAS",
+      "status": "online",
+      "healthy": true,
+      "details": "192.168.100.12:445"
+    },
+    {
+      "name": "Zephyr Docker",
+      "type": "docker",
+      "target": "192.168.100.13",
+      "host_name": "Zephyr",
+      "port": null,
+      "description": "Docker container status for webapp",
+      "status": "healthy",
+      "healthy": true,
+      "details": "docker container webapp on 192.168.100.13"
+    },
+    {
+      "name": "Astra Temperature",
+      "type": "temperature",
+      "target": "192.168.100.10",
+      "host_name": "Astra",
+      "port": null,
+      "description": "Temperature threshold for Astra",
+      "status": "healthy",
+      "healthy": true,
+      "details": "sensors: 58.3°C (threshold 70°C)"
+    }
+  ],
+  "metrics": {
+    "uptime": "2h 34m",
+    "uptime_seconds": 9240,
+    "temperatures": [
+      {
+        "label": "CPU Temp",
+        "celsius": 58.3
+      },
+      {
+        "label": "GPU Temp",
+        "celsius": 45.0
+      }
+    ],
+    "hosts": [
+      {
+        "name": "Astra - Debian 12 hardware",
+        "ip": "192.168.100.10"
+      },
+      {
+        "name": "Nimbus - Ubuntu Server VM",
+        "ip": "192.168.100.11"
+      },
+      {
+        "name": "Cumulus - OpenMediaVault NAS",
+        "ip": "192.168.100.12"
+      },
+      {
+        "name": "Zephyr - Alpine Linux VM",
+        "ip": "192.168.100.13"
+      }
+    ],
+    "host_count": 4
+  },
+  "errors_by_host": {},
+  "ip_to_name": {
+    "localhost": "Astra",
+    "127.0.0.1": "Astra",
+    "192.168.100.10": "Astra",
+    "192.168.100.11": "Nimbus",
+    "192.168.100.12": "Cumulus",
+    "192.168.100.13": "Zephyr"
+  },
+  "updated_at": 1710000000.0
+}

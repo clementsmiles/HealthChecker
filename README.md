@@ -20,6 +20,12 @@ Run continuously every 2 minutes:
 python health_checker.py --interval 120 --output status_cache.json
 ```
 
+Run continuously while exposing a status API for the dashboard:
+
+```bash
+python health_checker.py --interval 120 --output status_cache.json --serve --api-port 8001
+```
+
 ## Config
 
 Copy `services.example.json` to `services.json` and replace placeholder values with your real lab targets. Local `services.json` is excluded by `.gitignore` so actual addresses do not go public.
